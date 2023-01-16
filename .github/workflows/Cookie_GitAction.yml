@@ -1,0 +1,69 @@
+# this is to test cookiecutter with GitHub Actions
+name: trail_GitHubAction
+
+# Controls when the workflow will run
+on:
+  # Triggers the workflow on push or pull request events but only for the "main" branch
+  push:
+    paths:
+      - .github/workflows/Cookie_GitAction.yml
+      - UserConfig.txt
+
+  # Allows you to run this workflow manually from the Actions tab
+  workflow_dispatch:
+
+# A workflow run is made up of one or more jobs that can run sequentially or in parallel
+jobs:
+  # This workflow contains a single job called "test"
+  build:
+    name: Setting up the system
+    # The type of runner that the job will run on
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      packages: write
+
+    # Steps represent a sequence of tasks that will be executed as part of the job
+    steps:
+      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
+      - name: Check out repo
+        uses: actions/checkout@v3
+      
+      - name: Setting up Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: '3.x'
+
+      - name: Install dependencies
+        run: pip install cookiecutter
+      
+      - name: Scaffolding repository
+        # cookiecutter is command-line utility to create projects from templates
+        # https://github.com/cookiecutter/cookiecutter
+        #
+        # --no-input      Do not prompt for parameters and only use
+        #                 cookiecutter.json file content
+        #
+        run: cookiecutter https://github.com/Mikhil11/community-toolbox-MATLAB-template --no-input --config-file UserConfig.txt
+        
+       #Add files to repository
+      - name: Add-files
+        if: always()
+        continue-on-error: true
+        run: |
+          git config --global user.email mangrakh@mathworks.com && git config --global user.name mukeshangrakh
+          git add --all
+          git commit -m "respository added"
+       
+       #Remove files to repository
+      - name: Add-files
+        if: always()
+        continue-on-error: true
+        run: |
+          git config --global user.email mangrakh@mathworks.com && git config --global user.name mukeshangrakh
+          git mv test_template/* ./
+          git rm -r --ignore-unmatch test_template
+          git rm UserConfig.txt
+          git add --all
+          git commit -m "respository added"
+          git push
