@@ -1,0 +1,79 @@
+# This is a basic workflow to help you get started with Actions
+
+name: Test Template
+
+# Controls when the workflow will run
+on:
+  # Triggers the workflow on push or pull request events but only for the "main" branch
+  push:
+    branches:
+      - main
+      - 'code/*.m'
+    paths-ignore:
+      - 'README.MD'
+      - 'tests/*'
+      - '.github/workflows/**'
+      - 'LICENSE.txt'
+      - 'CONTRIBUTING.MD'
+      - 'AUTHORS.MD'
+
+  # Allows you to run this workflow manually from the Actions tab
+  workflow_dispatch:
+
+# A workflow run is made up of one or more jobs that can run sequentially or in parallel
+jobs:
+  # This workflow contains a single job called "test"
+  test:
+    name: Test Test Template
+    # The type of runner that the job will run on
+    runs-on: ubuntu-latest
+
+    # Steps represent a sequence of tasks that will be executed as part of the job
+    steps:
+      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
+      - name: Check out repo
+        uses: actions/checkout@v3
+      
+      - name: Set up MATLAB
+        uses: matlab-actions/setup-matlab@v1
+
+      # Check for MATLAB code issues in the project.
+      - name: Check for MATLAB code issues
+        uses: matlab-actions/run-command@v1
+        continue-on-error: true
+        if: always()
+        with:
+          command: addpath("buildutil"),codecheckToolbox()
+      
+      # Commit the JSON for the badge for the issues
+      - name: commit code issues badge JSON
+        if: always()
+        continue-on-error: true
+        run: |
+          git config --global user.email "mangrakh@mathworks.com" && git config --global user.name "mukeshangrakh"
+          git add report/badge/code_issues.json
+          git commit -m "Update code issues badge"
+          git push
+      # create environment variable
+      - name: Set the test_value
+        id: step_one
+        run: |
+          echo "action_state=yellow" >> $GITHUB_ENV
+          
+      # generate test parameters text file
+      - name: Create test parameters file
+        id: matlab_1
+        uses: matlab-actions/run-command@v1
+        if: always()
+        with:
+          command: addpath("buildutil"),TestFileTxt()
+
+      #Add files to repository
+      - name: Add-files
+        if: always()
+        continue-on-error: true
+        run: |
+          git config --global user.email "mangrakh@mathworks.com" && git config --global user.name "mukeshangrakh"
+          git add tests/Test_parameters.txt
+          git commit -m "test parameters file updated"
+          git push
