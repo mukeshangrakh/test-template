@@ -1,9 +1,0 @@
-default_context:
-    full_name: "User Full Name"
-    email: "mangrakh@mathworks.com"
-    github_username: "mukeshangrakh"
-    type_of_work: "toolbox"
-    repo_name: "Test Template"
-    project_short_description: "This project helps open source community to develop their own toolboxes using MATLAB environment"
-    version: "0.0.1"
-    open_source_license: "MIT license"
